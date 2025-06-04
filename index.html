@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FASTag Fitment</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    .logo-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .logo {
+      height: 40px;
+    }
+
+    .center-text {
+      text-align: center;
+    }
+
+    h2 {
+      margin: 10px 0 0 0;
+      font-size: 16px;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    td, th {
+      border: 1px solid #ccc;
+      padding: 6px;
+      font-size: 14px;
+    }
+
+    th {
+      background-color: #f1f1f1;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    .section-title {
+      margin-top: 15px;
+      font-weight: bold;
+      color: #003366;
+      font-size: 14px;
+    }
+
+    .note {
+      font-size: 11px;
+      margin-top: 10px;
+    }
+
+    .signatures {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .fitment-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 15px;
+    }
+
+    .fitment-form input, .fitment-form button {
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .fitment-form button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .fitment-form button:hover {
+      background-color: #0056b3;
+    }
+
+    .download-btn {
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .download-btn button {
+      padding: 10px 20px;
+      font-size: 14px;
+      background-color: green;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .download-btn button:hover {
+      background-color: darkgreen;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FORM SECTION -->
+  <div id="formArea" class="container">
+    <h2>FASTag Form</h2>
+    <form class="fitment-form" onsubmit="submitForm(event)">
+      <input type="text" id="challan" placeholder="Fitment Challan Number" required>
+      <input type="text" id="datetime" placeholder="Date & Time" required>
+      <input type="text" id="balance" placeholder="Current Balance" required>
+      <input type="text" id="deposit" placeholder="Security Deposit" required>
+      <input type="text" id="tagcost" placeholder="Tag Cost and Processing" required>
+      <input type="text" id="finalamount" placeholder="Final Amount" required>
+      <input type="text" id="regnum" placeholder="Vehicle Registration Number" required>
+      <input type="text" id="chassis" placeholder="Chassis No" required>
+      <input type="text" id="engine" placeholder="Engine No" required>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+  <!-- FITMENT PREVIEW SECTION -->
+  <div id="fitmentOutput" class="container" style="display: none;">
+    <div class="logo-row">
+      <img src="https://fastag.bajajfinserv.in/Content/b2c/images/Bajaj_Logo.png" alt="Bajaj Logo" class="logo" />
+      <img src="https://www.netc.org.in/images/netc/inner-banner/netc-status.png" alt="FASTag Logo" class="logo" />
+    </div>
+
+    <div class="center-text">
+      <h2>Proof of fitment of FASTag</h2>
+      <div>Fitment Challan Number: <span class="bold" id="out-challan"></span></div>
+      <div>Date & Time: <span class="bold" id="out-datetime"></span></div>
+    </div>
+
+    <div class="section-title">COST BREAK UP</div>
+    <table>
+      <tr><td>CURRENT BALANCE</td><td id="out-balance"></td></tr>
+      <tr><td>SECURITY DEPOSIT</td><td id="out-deposit"></td></tr>
+      <tr><td>TAG COST AND PROCESSING</td><td id="out-tagcost"></td></tr>
+      <tr><td>FINAL AMOUNT</td><td id="out-finalamount"></td></tr>
+    </table>
+
+    <div class="section-title">Vehicle Details</div>
+    <table>
+      <tr><td>Vehicle Registration Number</td><td id="out-regnum"></td></tr>
+      <tr><td>Chassis No</td><td id="out-chassis"></td></tr>
+      <tr><td>Engine No</td><td id="out-engine"></td></tr>
+    </table>
+
+    <div class="note">
+      Either Vehicle Registration Number or Chassis Number is mandatory information to be provided on the challan. <br />
+      *Vehicle owner shall be responsible affixing FASTag applied through online channels.
+    </div>
+
+    <div class="signatures">
+      Stamp & Signature of Dealer/Agent <br />
+      <strong>or</strong> <br />
+      Signature of Customer
+    </div>
+
+    <!-- Download Button -->
+    <div class="download-btn">
+      <button onclick="downloadPDF()">Download PDF</button>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    function submitForm(e) {
+      e.preventDefault();
+      const fields = ['challan', 'datetime', 'balance', 'deposit', 'tagcost', 'finalamount', 'regnum', 'chassis', 'engine'];
+      fields.forEach(id => {
+        document.getElementById('out-' + id).innerText = document.getElementById(id).value;
+      });
+      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('fitmentOutput').style.display = 'block';
+    }
+
+    async function downloadPDF() {
+      const fitmentDiv = document.getElementById('fitmentOutput');
+
+      // Store original styles
+      const originalWidth = fitmentDiv.style.width;
+      const originalMaxWidth = fitmentDiv.style.maxWidth;
+      const originalPadding = fitmentDiv.style.padding;
+
+      // Temporarily expand for PDF clarity
+      fitmentDiv.style.width = '794px';
+      fitmentDiv.style.maxWidth = 'none';
+      fitmentDiv.style.padding = '20px';
+
+      await new Promise(resolve => setTimeout(resolve, 100)); // Wait for layout
+
+      const canvas = await html2canvas(fitmentDiv, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF("p", "mm", "a4");
+
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save("FASTag_Fitment_Form.pdf");
+
+      // Restore styles
+      fitmentDiv.style.width = originalWidth;
+      fitmentDiv.style.maxWidth = originalMaxWidth;
+      fitmentDiv.style.padding = originalPadding;
+    }
+  </script>
+</body>
+</html>
